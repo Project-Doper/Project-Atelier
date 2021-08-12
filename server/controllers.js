@@ -3,25 +3,22 @@ const config = require("./config/config.js");
 
 const configuration = (endpoint, method, queryParams, bodyParams) => ({
   method: method,
-  url: `https://app-hrsei-api.herokuapp.com/api/fec2/${config.CAMPUS}/${endpoint}`,
-  headers: {
-    Authorization: `${config.TOKEN}`,
-  },
+  url: `http://localhost:3000/`,
+  // headers: {
+  //   Authorization: `${config.TOKEN}`,
+  // },
   data: bodyParams,
-  params: queryParams,
-  data: bodyParams
+  params: queryParams
 });
 
 module.exports = {
   products: {
     getProducts: (req, res) => {
-      axios(configuration("products", "get"))
-        .then((response) => {
-          res.status(200).send(response.data);
-        })
-        .catch((err) => {
-          res.status(404).send(err);
-        });
+      db.pool.query("SELECT * FROM product limit(4)", (err, data) => {
+        console.log(data);
+        res.status(200).send(data);
+        db.pool.end();
+      });
     },
     getProductInfo: (req, res) => {
       axios(configuration(`products/${req.params.id}`, "get"))

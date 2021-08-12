@@ -1,12 +1,8 @@
-const mongoose = require('mongoose');
-// const mongoUri = 'mongodb://localhost/blogmodo';
+const { Client } = require('pg')
+const client = new Client()
+await client.connect()
 
-mongoose.connect(mongoUri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useCreateIndex: true,
-});
 
-const db = mongoose.connection;
-
-module.exports = db;
+const res = await client.query('SELECT $1::text as message', ['Hello world!'])
+console.log(res.rows[0].message) // Hello world!
+await client.end()
