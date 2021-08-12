@@ -1,0 +1,26 @@
+{
+  "name": "sdc-server",
+  "version": "1.0.0",
+  "description": "Server side code that interacts with PostgreSQL database to be connected with client-side FEC project.",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon server/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Project-Doper/ryan-SDC.git"
+  },
+  "author": "Ryan Chi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Project-Doper/ryan-SDC/issues"
+  },
+  "homepage": "https://github.com/Project-Doper/ryan-SDC#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.12"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "pg": "^8.7.1"
+  }
+}
