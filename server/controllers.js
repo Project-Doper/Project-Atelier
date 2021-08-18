@@ -1,125 +1,96 @@
-const axios = require("axios");
-const config = require("./config/config.js");
-
-const configuration = (endpoint, method, queryParams, bodyParams) => ({
-  method: method,
-  url: `http://localhost:3000/`,
-  // headers: {
-  //   Authorization: `${config.TOKEN}`,
-  // },
-  data: bodyParams,
-  params: queryParams
-});
+const moment = require('moment');
+const db = require("./db/db.js");
 
 module.exports = {
   products: {
     getProducts: (req, res) => {
-      db.pool.query("SELECT * FROM product limit(4)", (err, data) => {
-        console.log(data);
-        res.status(200).send(data);
-        db.pool.end();
+      db.pool.query("SELECT * FROM product order by index asc limit(10)", (err, data) => {
+        res.status(200).send(data.rows);
       });
     },
     getProductInfo: (req, res) => {
-      axios(configuration(`products/${req.params.id}`, "get"))
-        .then((response) => {
-          res.status(200).send(response.data);
-        })
-        .catch((err) => {
-          res.status(404).send(err);
-        });
-    },
-    getProductStyles: (req, res) => {
-      axios(configuration(`products/${req.params.id}/styles`, "get"))
-        .then((response) => {
-          res.status(200).send(response.data);
-        })
-        .catch((err) => {
-          res.status(404).send(err);
-        });
-    },
-    getRelatedProducts: (req, res) => {
-      axios(configuration(`products/${req.params.id}/related`, "get"))
-        .then((response) => {
-          res.status(200).send(response.data);
-        })
-        .catch((err) => {
-          res.status(404).send(err);
-        });
+      db.pool.query(`SELECT * FROM product WHERE index = ${req.params.id}`, (err, data) => {
+        res.status(200).send(data.rows);
+      });
     },
   },
   qa: {
     getQuestions: (req, res) => {
-      queryParams = {
-        product_id: req.params.id,
-        count: 100
-      };
-      axios(configuration("qa/questions", "get", queryParams))
-        .then((response) => {
-          res.status(200).send(response.data);
-        })
-        .catch((err) => {
-          res.status(404).send(err);
-        });
+      db.pool.query(`SELECT id, product_id, body, TO_CHAR(TO_TIMESTAMP(date_written / 1000), 'YYYY-MM-DDThh:mm:ss.SSSZ') AS date_written, asker_name, reported, helpful FROM questions WHERE product_id = ${req.params.id} AND reported != 1`, (err, data) => {
+        console.log(data.rows);
+        res.status(200).send(data.rows);
+      });
     },
     getAnswers: (req, res) => {
-      queryParams = {
-        count: 100
-      };
-      axios(configuration(`qa/questions/${req.params.id}/answers`, "get", queryParams))
-        .then((response) => {
-          res.status(200).send(response.data);
-        })
-        .catch((err) => {
-          res.status(404).send(err);
-        });
+      db.pool.query(`SELECT id, question_id, body, TO_CHAR(TO_TIMESTAMP(date_written / 1000), 'YYYY-MM-DDThh:mm:ss.SSSZ') AS date_written, answerer_name, reported, helpful FROM answers WHERE question_id = ${req.params.id} AND reported != 1`, (err, data) => {
+        res.status(200).send(data.rows);
+      });
     },
     updateQuestionHelpfulness: (req, res) => {
-      axios(configuration(`qa/questions/${req.params.id}/helpful`, "put"))
-        .then((response) => {
-          res.status(200).send();
-        })
-        .catch((err) => {
-          res.status(404).send(err);
-        });
+      db.pool.query(`UPDATE questions SET helpful = helpful + 1 WHERE id = ${req.params.id} RETURNING helpful`, (err, data) => {
+        res.status(200).send(data.rows);
+      })
     },
     updateAnswerHelpfulness: (req, res) => {
-      axios(configuration(`qa/answers/${req.params.id}/helpful`, "put"))
-        .then((response) => {
-          res.status(200).send();
-        })
-        .catch((err) => {
-          res.status(404).send(err);
-        });
+      db.pool.query(`UPDATE answers SET helpful = helpful + 1 WHERE id = ${req.params.id} RETURNING helpful`, (err, data) => {
+        res.status(200).send(data.rows);
+      })
     },
     postQuestions: (req, res) => {
-      questionObject = req.body;
-      axios(configuration(`qa/questions/`, "post", null, questionObject))
-        .then((response) => {
-          res.status(200).send(response.data);
-        })
-        .catch((err) => {
-          res.status(404).send(err);
-        });
+      // const text = 'INSERT INTO questions (product_id, body, date_written, asker_name, asker_email, reported, helpful) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id'
+      // const values = [req.body.product_id, req.body.body, 1616066721011, req.body.name, req.body.email, 0, 0]
+      // db.pool.query(text, values, (err, data) => {
+      //   if (err) {
+      //     console.error(err);
+      //   }
+      //   else {
+      //     res.status(201).send();
+      //   }
+      // })
+      let date = moment().valueOf()
+      const text = 'INSERT INTO questions (product_id, body, date_written, asker_name, asker_email, reported, helpful) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id'
+      const values = [req.body.product_id, req.body.body, date, req.body.name, req.body.email, 0, 0]
+      db.pool.query(text, values, (err, data) => {
+        if (err) {
+          console.error(err);
+        }
+        else {
+          res.status(201).send();
+        }
+      })
     },
     postAnswers: (req, res) => {
-      answerObject = req.body;
-      axios(configuration(`qa/questions/${req.params.id}/answers/`, "post", null, answerObject))
-        .then((response) => {
-          res.status(200).send(response.data);
+      db.client.connect()
+      db.client
+        .query("begin")
+        .then(data => {
+          let date = moment().valueOf()
+          const text = 'INSERT INTO answers (question_id, body, date_written, answerer_name, answerer_email, reported, helpful) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id'
+          const values = [req.params.id, req.body.body, date, req.body.name, req.body.email, 0, 0]
+          return db.client.query(text, values)
         })
-        .catch((err) => {
-          res.status(404).send(err);
-        });
+        .then(data => {
+          const text1 = 'INSERT INTO answers_photos (answer_id, url) VALUES ($1, $2)'
+          const values1 = [data.rows[0].id, req.body.photos]
+          return db.client.query(text1, values1)
+        })
+        .then(data => {
+          return db.client.query("commit")
+        })
+        .then(data => {
+          console.log('Transaction Complete!')
+          res.status(201).send();
+        })
+        .catch(err => {
+          console.error("Error while querying: ", err)
+          return db.client.query("rollback")
+        })
+        .catch(err => console.error("Error while rolling back transaction:", err))
     },
     reportAnswer: (req, res) => {
-      axios(configuration(`qa/answers/${req.params.id}/report`, "put"))
-        .then((response) => {
-          res.status(200).send();
-        })
-        .catch((err) => {
-          res.status(404).send(err);
-        });
+      db.pool.query(`UPDATE answers SET reported = 1 WHERE id = ${req.params.id}`, (err, data) => {
+        res.status(204).send();
+      })
     },
   },
 };

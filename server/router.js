@@ -4,11 +4,6 @@ const router = require("express").Router();
 // Product Routes
 router.route("/products").get(controllers.products.getProducts);
 router.route("/products/:id").get(controllers.products.getProductInfo);
-router.route("/products/:id/styles").get(controllers.products.getProductStyles);
-router
-  .route("/products/:id/related")
-  .get(controllers.products.getRelatedProducts);
-
 
 // Question and Answers Routes
 router.route("/qa/questions/:id").get(controllers.qa.getQuestions);
