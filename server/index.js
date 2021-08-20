@@ -3,10 +3,13 @@ const path = require("path");
 const router = require("./router");
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT;
 
 app.use(express.json());
 app.use("/api", router);
+app.get('/', (req, res) => {
+  res.send(`App running at PORT ${port}`)
+});
 
 app.listen(port, (err) => {
   if (err) {

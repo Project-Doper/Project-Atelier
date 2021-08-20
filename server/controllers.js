@@ -17,7 +17,6 @@ module.exports = {
   qa: {
     getQuestions: (req, res) => {
       db.pool.query(`SELECT id, product_id, body, TO_CHAR(TO_TIMESTAMP(date_written / 1000), 'YYYY-MM-DDThh:mm:ss.SSSZ') AS date_written, asker_name, reported, helpful FROM questions WHERE product_id = ${req.params.id} AND reported != 1`, (err, data) => {
-        console.log(data.rows);
         res.status(200).send(data.rows);
       });
     },
