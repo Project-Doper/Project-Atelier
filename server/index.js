@@ -8,8 +8,10 @@ const port = process.env.PORT;
 app.use(express.json());
 app.use("/api", router);
 app.get('/', (req, res) => {
-  res.send(`App running at PORT ${port}`)
+  res.send(`App running at first server port: ${port}`)
 });
+
+
 
 app.listen(port, (err) => {
   if (err) {

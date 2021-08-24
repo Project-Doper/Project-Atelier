@@ -36,16 +36,6 @@ module.exports = {
       })
     },
     postQuestions: (req, res) => {
-      // const text = 'INSERT INTO questions (product_id, body, date_written, asker_name, asker_email, reported, helpful) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id'
-      // const values = [req.body.product_id, req.body.body, 1616066721011, req.body.name, req.body.email, 0, 0]
-      // db.pool.query(text, values, (err, data) => {
-      //   if (err) {
-      //     console.error(err);
-      //   }
-      //   else {
-      //     res.status(201).send();
-      //   }
-      // })
       let date = moment().valueOf()
       const text = 'INSERT INTO questions (product_id, body, date_written, asker_name, asker_email, reported, helpful) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id'
       const values = [req.body.product_id, req.body.body, date, req.body.name, req.body.email, 0, 0]
