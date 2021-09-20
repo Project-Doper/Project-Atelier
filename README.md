@@ -1,12 +1,6 @@
 # Project Atelier
 
 ### Overview
-Back-end implementation to interact with front-end application to handle all API requests. Utilizes PostgreSQL database loaded
-
-
-### How to run the app locally:
-1) Open your terminal in the downloaded repository.
-2) Run the command `npm install`
-3) Run the command `npm build`
-4) Run the command `npm start`
-5) Paste this link into a browser: http://localhost:4000/
+Back-end implementation to interact with front-end application to handle all API requests. Utilizes three
+AWS EC2 instances to hold a PostgreSQL database in one instance and servers to handle the API requests in
+two instances. Servers are load balanced using NGINX's round-robin load balancer.
