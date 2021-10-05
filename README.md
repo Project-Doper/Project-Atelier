@@ -11,6 +11,7 @@ two instances. Servers are load balanced using NGINX's round-robin load balancer
 * PostgreSQL / pgAdmin
 * AWS:EC2
 * NGINX
+* Postman
 * Loader.io / k6
 
 ### Contributors:
